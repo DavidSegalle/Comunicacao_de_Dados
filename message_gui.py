@@ -37,7 +37,7 @@ class MyWindow:
         self.should_cipher = tk.IntVar()#                                                                        |
         self.set_cipher_box = tk.Checkbutton(self.master, text="Cypher", variable=self.should_cipher)#           |
         self.set_cipher_box.pack()#                                                                              |
-#                                                                                                                | 
+#                                                                                                                |
         time.sleep(5) # Aqui               <---------------------------------------------------------------------┘
 
         graph = ci.plot_graph(received_message)
