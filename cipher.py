@@ -1,113 +1,94 @@
 import matplotlib.pyplot as plt
 from typing import List
 
-# Adoro documentação redundante.
 
-# Retorna texto criptografado (caesar cipher com dois deslocamentos).
 def encrypt(message: str):
     encrypted = []
     for ch in message:
-        encrypted.append(ch if ord(ch) < 32 or ord(ch) >= 128\
-                         else chr((ord(ch) - 32 + 94) % 96 + 32))
-    encrypted = "".join(encrypted)
-    return encrypted
+        # Utiliza cifra de cesar com tres deslocamentos.
+        # Afeta somente caracteres ASCII imprimiveis.
+        encrypted.append(ch if ord(ch) < 32 or ord(ch) >= 128 \
+                         else chr((ord(ch) - 32 + 3) % 96 + 32))
+    return ''.join(encrypted)
 
 
-# Retorna texto descriptografado.
 def decrypt(message: str):
     decrypted = []
     for ch in message:
-        decrypted.append(ch if ord(ch) < 32 or ord(ch) >= 128\
-                         else chr((ord(ch) - 32 + 2) % 96 + 32))
-    decrypted = "".join(decrypted)
-    return decrypted
+        # -3 = 93 (mod 96).
+        decrypted.append(ch if ord(ch) < 32 or ord(ch) >= 128 \
+                         else chr((ord(ch) - 32 + 93) % 96 + 32))
+    return ''.join(decrypted)
 
 
-# Retorna lista de bits a partir de um texto.
-def to_binary(message: str):
-    message = message.encode()
+def to_binary(text: str):
+    text = text.encode('latin_1')
+    # Converte texto para lista de bits.
     binary = []
-    for ch in message:
+    for ch in text:
         for i in range(0, 8):
-            binary.append(1 if ch & 1 << i != 0 else 0)
+            binary.append(0 if ch & 1 << i == 0 else 1)
     return binary
 
 
-# Retorna texto a partir de uma lista de bits.
-def to_string(message: str):
+def to_text(binary: List[int]):
+    # Converte lista de bits para texto.
     text = bytearray()
-    for i in range(0, len(message), 8):
+    for i in range(0, len(binary), 8):
         ch = 0
         for j in range(0, 8):
-            ch += 0 if message[i + j] == 0 else 1 << j
+            ch += 0 if binary[i + j] == 0 else 1 << j
         text.append(ch)
-    text = text.decode()
+    text = text.decode('latin_1')
     return text
 
 
-# Converte lista de bits para sinal digital (2B1Q).
-def codLin_2b1q(binaryInfo: List[int]):
-    response = []
-    atN = 0
-    szAns = 0
-    sgn = 1
-    if len(binaryInfo) % 2 == 1:
-        binaryInfo.append(0)
-    for i in range(0, len(binaryInfo)):
-        if i % 2 == 0:
-            atN +=  2 * binaryInfo[i]
-            continue
-        atN += binaryInfo[i]
-        if atN == 0 or atN == 2:
-            response.append(1)
+def encode_2b1q(binary: List[int]):
+    # Converte dados digitais para sinal digital.
+    signal = []
+    if len(binary) % 2 == 1:
+        binary.append(0)
+    for i in range(0, len(binary), 2):
+        el = (binary[i] << 1) + binary[i + 1]
+        if el == 0 or el == 2:
+            signal.append(1)
         else:
-            response.append(3)
-        if atN >= 2:
-            response[szAns] *= -1
-        if szAns > 0 and response[szAns - 1] < 0:
-            response[szAns] *= -1
-        szAns += 1
-        atN = 0
-    return response
+            signal.append(3)
+        if el >= 2:
+            signal[-1] *= -1
+        if len(signal) > 1 and signal[-2] < 0:
+            signal[-1] *= -1
+    return signal
 
 
-# Converte sinal digital para lista de bits (2B1Q).
-def decodLin_2b1q(signal: List[int]):
-    bitInfo = []
-    ant = 1
+def decode_2b1q(signal: List[int]):
+    # Converte sinal digital para dados digitais.
+    binary = []
+    is_prev_positive = True
     for el in signal:
-        if ant == 1:
+        if is_prev_positive:
             if el == 1:
-                bitInfo.append(0)
-                bitInfo.append(0)
+                binary.extend([0, 0])
             elif el == 3:
-                bitInfo.append(0)
-                bitInfo.append(1)
+                binary.extend([0, 1])
             if el == -1:
-                bitInfo.append(1)
-                bitInfo.append(0)
+                binary.extend([1, 0])
             elif el == -3:
-                bitInfo.append(1)
-                bitInfo.append(1)
+                binary.extend([1, 1])
         else:
             if el == 1:
-                bitInfo.append(1)
-                bitInfo.append(0)
+                binary.extend([1, 0])
             elif el == 3:
-                bitInfo.append(1)
-                bitInfo.append(1)
+                binary.extend([1, 1])
             if el == -1:
-                bitInfo.append(0)
-                bitInfo.append(0)
+                binary.extend([0, 0])
             elif el == -3:
-                bitInfo.append(0)
-                bitInfo.append(1)
-        ant = el > 0
-    return bitInfo
+                binary.extend([0, 1])
+        is_prev_positive = el > 0
+    return binary
 
 
-# Apresenta forma de onda em gráfico.
-def plot_graph(signal: List[int]):
+def plot_graph(signal: List[int], title: str):
     plt.clf()
     y = []
     if len(signal) > 0:
@@ -118,9 +99,38 @@ def plot_graph(signal: List[int]):
     plt.step(x, y)
     plt.xlabel('Tempo')
     plt.ylabel('Volts')
-    plt.title('Sinal mensagem')
+    plt.title(title)
     #plt.show()
     return plt.gcf()
+
+
+def send_signal(signal: List[int]):
+    data = bytearray()
+    for el in signal:
+        if el == -3:
+            data.append(0)
+        elif el == -1:
+            data.append(1)
+        elif el == 1:
+            data.append(2)
+        elif el == 3:
+            data.append(3)
+    return data
+
+
+def receive_signal(data):
+    signal = []
+    for ch in data:
+        if ch == 0:
+            signal.append(-3)
+        elif ch == 1:
+            signal.append(-1)
+        elif ch == 2:
+            signal.append(1)
+        elif ch == 3:
+            signal.append(3)
+    return signal
+
 
 def main():
 
@@ -134,14 +144,14 @@ def main():
     binary = to_binary(encrypted)
     print(binary)
 
-    signal = codLin_2b1q(binary)
+    signal = encode_2b1q(binary)
     print(signal)
     plot_graph(signal)
 
-    bits = decodLin_2b1q(signal)
+    bits = decode_2b1q(signal)
     print(bits)
 
-    text = to_string(bits)
+    text = to_text(bits)
     print(text)
 
     decrypted = decrypt(text)
