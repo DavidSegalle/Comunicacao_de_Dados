@@ -8,7 +8,7 @@ class Server:
         self.maxConnections = 999
         self.IP = socket.gethostname()
 
-        self.listensocket.bind(('', self.port))
+        self.listensocket.bind(('ubuntu-vaio', self.port))
 
         self.listensocket.listen(self.maxConnections)
         print("Server started at " + self.IP + " on port " + str(self.port))
