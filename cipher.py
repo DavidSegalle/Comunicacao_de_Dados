@@ -108,6 +108,7 @@ def decodLin_2b1q(signal: List[int]):
 
 # Apresenta forma de onda em gráfico.
 def plot_graph(signal: List[int]):
+    plt.clf()
     y = []
     if len(signal) > 0:
         y.append(signal[0])
@@ -118,7 +119,8 @@ def plot_graph(signal: List[int]):
     plt.xlabel('Tempo')
     plt.ylabel('Volts')
     plt.title('Sinal mensagem')
-    plt.show()
+    #plt.show()
+    return plt.gcf()
 
 def main():
 
