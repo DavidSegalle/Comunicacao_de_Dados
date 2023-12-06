@@ -1,6 +1,7 @@
 import tkinter as tk
 import cipher as ci
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import time
 
 class MyWindow:
     def __init__(self, master: tk.Tk):
@@ -28,9 +29,43 @@ class MyWindow:
         elif self.client_server_string.get() == 'server':
             self.server_screen()
         
-    def server_screen():
-        pass
+    def server_screen(self):
+        
+        # Receber mensagem aqui e remover aquele sleep ali em baixo, mais especificamente, o sleep que está------┐
+        received_message = [-3, 3, -1, 1]#                                                                       |
+#                                                                                                                |
+        self.should_cipher = tk.IntVar()#                                                                        |
+        self.set_cipher_box = tk.Checkbutton(self.master, text="Cypher", variable=self.should_cipher)#           |
+        self.set_cipher_box.pack()#                                                                              |
+#                                                                                                                | 
+        time.sleep(5) # Aqui               <---------------------------------------------------------------------┘
 
+        graph = ci.plot_graph(received_message)
+        canvas = FigureCanvasTkAgg(graph, master=self.master)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+
+        applied_algorithm_message = tk.Label(self.master, text="Which is: " + str(received_message))
+        applied_algorithm_message.pack()
+
+        removed_algorithm = ci.decodLin_2b1q(received_message)
+        removed_algorithm_message = tk.Label(self.master, text="After removing the algorithm: " + str(removed_algorithm))
+        removed_algorithm_message.pack()
+
+        message = ci.to_string(removed_algorithm)
+        crypted_message = tk.Label(self.master, text="The crypted text is: " + str(message) + " Since should cript was set to " + str(self.should_cipher.get()))
+        crypted_message.pack()
+        
+        if self.should_cipher.get() == 1:
+            message = ci.decrypt(message)
+
+        on_screen_message = tk.Label(self.master, text="The original message was: " + message)
+        on_screen_message.pack()
+
+
+        
+
+        
     def client_screen(self):
 
         for widget in self.master.winfo_children():
