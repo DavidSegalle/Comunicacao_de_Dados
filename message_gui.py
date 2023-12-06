@@ -85,7 +85,6 @@ class MyWindow:
 
 
     def new_message_setup(self):
-        print(self.should_cipher.get())
         self.clean_screen()
         self.server_screen()
 
