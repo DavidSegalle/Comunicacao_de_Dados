@@ -131,6 +131,7 @@ class MyWindow:
         on_screen_message.pack()
 
         binary = ci.to_binary(message)
+        # binary = [0, 0, 1, 1, 0, 1, 1, 0, 0, 1]
         binary_message = tk.Label(self.master, text="The binary is: " + str(binary))
         binary_message.pack()
 

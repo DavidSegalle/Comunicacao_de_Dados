@@ -98,7 +98,7 @@ def plot_graph(signal: List[int], title: str):
     x = range(0, len(y))
     plt.step(x, y)
     plt.xlabel('Tempo')
-    plt.ylabel('Volts')
+    plt.ylabel('Nível')
     plt.title(title)
     #plt.show()
     return plt.gcf()
