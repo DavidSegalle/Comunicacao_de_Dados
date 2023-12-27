@@ -133,7 +133,6 @@ def receive_signal(data):
 
 
 def main():
-
     # Teste:
     message = input()
     print(message)
